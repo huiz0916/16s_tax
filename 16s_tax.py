@@ -59,24 +59,38 @@ blast options:
     return str_msg
 
 def blast_online(fasta_input, blast_type, blast_db, blast_num_al, output_alignment):
-    record = SeqIO.read(fasta_input, format="fasta")
-    result_handle = NCBIWWW.qblast(blast_type, blast_db, record.format("fasta"), alignments=blast_num_al)
+    fasta_input = open(fasta_input, "r").read()
+    result_handle = NCBIWWW.qblast(blast_type, blast_db, fasta_input.format("fasta"), alignments=blast_num_al, megablast=True)
     save_file = open(output_alignment+".xml", "w")
     save_file.write(result_handle.read())
     save_file.close()
     result_handle.close()
+
     return True
 
-def entrez_gi(al_input,blast_email):
+def entrez_gi_to_gb(al_input,blast_email):
+    blast_out = {}
     result_handle = open(al_input, "r")
     blast_records = NCBIXML.parse(result_handle)
+    
+    gi_id_list = []
     for alignment in blast_records.alignments:
         gi_id = alignment.title.split("|")[1]
-        handle = Entrez.esearch(db="nucleotide", term=gi_id)
-    
+        gi_id_list.append(gi_id)
+    result_handle.close()
+    Entrez.email = blast_email
+    entrez_handle = Entrez.efetch(db="nucleotide", term=tuple(gi_id_list), rettype="gb", retmode= "text")
 
-def parse_gb():
-    pass
+    tax_record = {}
+    for seq_record in SeqIO.parse(entrez_handle, "genbank"):
+        tax_record = {seq_record.id:seq_record.annotations['organism']+','.join(seq_record.annotations['taxonomy'])}
+
+    return tax_record
+
+#gb id match blast id, output result
+
+
+
 
 def main(argv=None):
 

@@ -1,26 +1,37 @@
+
 from Bio import Entrez, SeqIO
 from Bio.Blast import NCBIWWW, Record, NCBIXML
 
+fasta_input = open("test_16s.fa","r").read()
+result_handle = NCBIWWW.qblast("blastn", "nt", fasta_input.format("fasta"),megablast=True)
+save_file = open("test_16s_blast2.xml", "w")
+save_file.write(result_handle.read())
+save_file.close()
 
 
+'''
+result_handle = open("test_16s_blast2.xml", "r")
+blast_records = NCBIXML.parse(result_handle)
+result_handle = open("test_16s_blast.xml", "r")
+blast_records = NCBIXML.parse(result_handle)
+for blast_record  in blast_records:
+    for alignment in blast_record.alignments:
+        for hsp in alignment.hsps:
+            print(alignment.title)
+            print(hsp.identities)
+            print(alignment.length)
+            print(hsp.num_alignments)
+            print(hsp.query_start)
+            print(hsp.query_end)
+            print(hsp.sbjct_start)
+            print(hsp.sbjct_end)
+            print(hsp.expect)
+            print(hsp.score)
+'''           
+        
 
 
-result_handle = open("test_my_blast.xml", "r")
-blast_records = NCBIXML.read(result_handle)
-
-E_VALUE_THRESH = 0.04
-#print("qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qcovs")
-gi_id_list = []
-for alignment in blast_records.alignments:
-    gi_id = alignment.title.split("|")[1]
-    #print(type(gi_id))
-    gi_id_list.append(gi_id)
-
-search_results = Entrez.read(Entrez.epost("pubmed", id=",".join(gi_id_list)[0:2]))
-
-    
-    #for hsp in alignment.hsps:
-    #    print('sequence:', alignment.length)
+#search_results = Entrez.read(Entrez.epost("pubmed", id=",".join(gi_id_list)[0:2]))
 
 
 
